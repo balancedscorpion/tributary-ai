@@ -1,0 +1,576 @@
+{
+  "schema_version": "highcharts-capabilities.v2",
+  "stage": "stage2-curated-full",
+  "chart_spec_versions": [
+    "highcharts-plot-spec.v1",
+    "highcharts-plot-spec.v2"
+  ],
+  "chart_spec_version": "highcharts-plot-spec.v2",
+  "highcharts_version": "12.5.0",
+  "constructors": {
+    "core": {
+      "constructor": "chart",
+      "bundle": "highcharts/highcharts"
+    },
+    "stock": {
+      "constructor": "stockChart",
+      "bundle": "highcharts/highstock"
+    },
+    "maps": {
+      "constructor": "mapChart",
+      "bundle": "highcharts/highmaps"
+    },
+    "gantt": {
+      "constructor": "ganttChart",
+      "bundle": "highcharts/highcharts-gantt"
+    }
+  },
+  "module_catalog": {
+    "highcharts-more": {
+      "import_path": "highcharts/highcharts-more",
+      "depends_on": []
+    },
+    "drilldown": {
+      "import_path": "highcharts/modules/drilldown",
+      "depends_on": []
+    },
+    "heatmap": {
+      "import_path": "highcharts/modules/heatmap",
+      "depends_on": []
+    },
+    "tilemap": {
+      "import_path": "highcharts/modules/tilemap",
+      "depends_on": [
+        "heatmap"
+      ]
+    },
+    "treemap": {
+      "import_path": "highcharts/modules/treemap",
+      "depends_on": []
+    },
+    "sunburst": {
+      "import_path": "highcharts/modules/sunburst",
+      "depends_on": [
+        "treemap"
+      ]
+    },
+    "sankey": {
+      "import_path": "highcharts/modules/sankey",
+      "depends_on": []
+    },
+    "organization": {
+      "import_path": "highcharts/modules/organization",
+      "depends_on": [
+        "sankey"
+      ]
+    },
+    "dependency-wheel": {
+      "import_path": "highcharts/modules/dependency-wheel",
+      "depends_on": [
+        "sankey"
+      ]
+    },
+    "networkgraph": {
+      "import_path": "highcharts/modules/networkgraph",
+      "depends_on": []
+    },
+    "wordcloud": {
+      "import_path": "highcharts/modules/wordcloud",
+      "depends_on": []
+    },
+    "venn": {
+      "import_path": "highcharts/modules/venn",
+      "depends_on": []
+    },
+    "timeline": {
+      "import_path": "highcharts/modules/timeline",
+      "depends_on": []
+    },
+    "xrange": {
+      "import_path": "highcharts/modules/xrange",
+      "depends_on": []
+    },
+    "streamgraph": {
+      "import_path": "highcharts/modules/streamgraph",
+      "depends_on": [
+        "highcharts-more"
+      ]
+    },
+    "item-series": {
+      "import_path": "highcharts/modules/item-series",
+      "depends_on": []
+    },
+    "pareto": {
+      "import_path": "highcharts/modules/pareto",
+      "depends_on": [
+        "histogram-bellcurve"
+      ]
+    },
+    "dumbbell": {
+      "import_path": "highcharts/modules/dumbbell",
+      "depends_on": [
+        "highcharts-more"
+      ]
+    },
+    "lollipop": {
+      "import_path": "highcharts/modules/lollipop",
+      "depends_on": [
+        "dumbbell"
+      ]
+    },
+    "funnel": {
+      "import_path": "highcharts/modules/funnel",
+      "depends_on": []
+    },
+    "histogram-bellcurve": {
+      "import_path": "highcharts/modules/histogram-bellcurve",
+      "depends_on": []
+    },
+    "geoheatmap": {
+      "import_path": "highcharts/modules/geoheatmap",
+      "depends_on": [
+        "heatmap"
+      ]
+    },
+    "flowmap": {
+      "import_path": "highcharts/modules/flowmap",
+      "depends_on": []
+    },
+    "tiledwebmap": {
+      "import_path": "highcharts/modules/tiledwebmap",
+      "depends_on": []
+    }
+  },
+  "supported_modules": [
+    "core",
+    "stock",
+    "maps",
+    "gantt"
+  ],
+  "supported_series_types_by_constructor": {
+    "core": [
+      "area",
+      "areaspline",
+      "bar",
+      "bellcurve",
+      "bubble",
+      "column",
+      "dependencywheel",
+      "dumbbell",
+      "funnel",
+      "heatmap",
+      "histogram",
+      "item",
+      "line",
+      "lollipop",
+      "networkgraph",
+      "organization",
+      "pareto",
+      "pie",
+      "sankey",
+      "scatter",
+      "spline",
+      "streamgraph",
+      "sunburst",
+      "tilemap",
+      "timeline",
+      "treemap",
+      "venn",
+      "wordcloud",
+      "xrange"
+    ],
+    "stock": [
+      "area",
+      "areaspline",
+      "bellcurve",
+      "candlestick",
+      "column",
+      "histogram",
+      "line",
+      "ohlc",
+      "pareto",
+      "scatter",
+      "spline",
+      "xrange"
+    ],
+    "maps": [
+      "bubble",
+      "flowmap",
+      "geoheatmap",
+      "heatmap",
+      "map",
+      "mapbubble",
+      "mapline",
+      "mappoint",
+      "scatter",
+      "tilemap"
+    ],
+    "gantt": [
+      "column",
+      "gantt",
+      "line",
+      "xrange"
+    ]
+  },
+  "supported_series_types": {
+    "core": [
+      "area",
+      "areaspline",
+      "bar",
+      "bellcurve",
+      "bubble",
+      "column",
+      "dependencywheel",
+      "dumbbell",
+      "funnel",
+      "heatmap",
+      "histogram",
+      "item",
+      "line",
+      "lollipop",
+      "networkgraph",
+      "organization",
+      "pareto",
+      "pie",
+      "sankey",
+      "scatter",
+      "spline",
+      "streamgraph",
+      "sunburst",
+      "tilemap",
+      "timeline",
+      "treemap",
+      "venn",
+      "wordcloud",
+      "xrange"
+    ],
+    "stock": [
+      "area",
+      "areaspline",
+      "bellcurve",
+      "candlestick",
+      "column",
+      "histogram",
+      "line",
+      "ohlc",
+      "pareto",
+      "scatter",
+      "spline",
+      "xrange"
+    ],
+    "maps": [
+      "bubble",
+      "flowmap",
+      "geoheatmap",
+      "heatmap",
+      "map",
+      "mapbubble",
+      "mapline",
+      "mappoint",
+      "scatter",
+      "tilemap"
+    ],
+    "gantt": [
+      "column",
+      "gantt",
+      "line",
+      "xrange"
+    ]
+  },
+  "supported_series_types_global": [
+    "area",
+    "areaspline",
+    "bar",
+    "bellcurve",
+    "bubble",
+    "candlestick",
+    "column",
+    "dependencywheel",
+    "dumbbell",
+    "flowmap",
+    "funnel",
+    "gantt",
+    "geoheatmap",
+    "heatmap",
+    "histogram",
+    "item",
+    "line",
+    "lollipop",
+    "map",
+    "mapbubble",
+    "mapline",
+    "mappoint",
+    "networkgraph",
+    "ohlc",
+    "organization",
+    "pareto",
+    "pie",
+    "sankey",
+    "scatter",
+    "spline",
+    "streamgraph",
+    "sunburst",
+    "tilemap",
+    "timeline",
+    "treemap",
+    "venn",
+    "wordcloud",
+    "xrange"
+  ],
+  "allowed_option_paths_by_constructor": {
+    "core": [
+      "chart",
+      "chart.type",
+      "chart.zoomType",
+      "title",
+      "title.text",
+      "subtitle",
+      "subtitle.text",
+      "caption",
+      "caption.text",
+      "xAxis",
+      "xAxis.type",
+      "xAxis.categories",
+      "xAxis.min",
+      "xAxis.max",
+      "yAxis",
+      "yAxis.type",
+      "yAxis.min",
+      "yAxis.max",
+      "yAxis.title.text",
+      "zAxis",
+      "colorAxis",
+      "legend",
+      "tooltip",
+      "tooltip.shared",
+      "tooltip.outside",
+      "tooltip.useHTML",
+      "tooltip.formatter_id",
+      "tooltip.pointFormat",
+      "tooltip.valueSuffix",
+      "plotOptions",
+      "series",
+      "series[].type",
+      "series[].name",
+      "series[].data",
+      "series[].id",
+      "series[].drilldown",
+      "series[].custom",
+      "drilldown",
+      "drilldown.series",
+      "navigation",
+      "responsive",
+      "credits",
+      "time",
+      "annotations",
+      "data",
+      "accessibility",
+      "boost"
+    ],
+    "stock": [
+      "chart",
+      "chart.type",
+      "chart.zoomType",
+      "title",
+      "title.text",
+      "subtitle",
+      "subtitle.text",
+      "xAxis",
+      "xAxis.type",
+      "xAxis.categories",
+      "xAxis.min",
+      "xAxis.max",
+      "yAxis",
+      "yAxis.type",
+      "yAxis.min",
+      "yAxis.max",
+      "yAxis.title.text",
+      "legend",
+      "tooltip",
+      "tooltip.shared",
+      "tooltip.outside",
+      "tooltip.useHTML",
+      "tooltip.formatter_id",
+      "tooltip.pointFormat",
+      "tooltip.valueSuffix",
+      "plotOptions",
+      "series",
+      "series[].type",
+      "series[].name",
+      "series[].data",
+      "series[].id",
+      "series[].drilldown",
+      "series[].custom",
+      "drilldown",
+      "drilldown.series",
+      "rangeSelector",
+      "navigator",
+      "scrollbar",
+      "navigation",
+      "responsive",
+      "credits",
+      "time",
+      "annotations",
+      "data",
+      "accessibility",
+      "boost"
+    ],
+    "maps": [
+      "chart",
+      "chart.type",
+      "title",
+      "title.text",
+      "subtitle",
+      "subtitle.text",
+      "legend",
+      "tooltip",
+      "tooltip.shared",
+      "tooltip.outside",
+      "tooltip.useHTML",
+      "tooltip.formatter_id",
+      "tooltip.pointFormat",
+      "tooltip.valueSuffix",
+      "plotOptions",
+      "series",
+      "series[].type",
+      "series[].name",
+      "series[].data",
+      "series[].mapData",
+      "series[].joinBy",
+      "series[].keys",
+      "series[].custom",
+      "mapView",
+      "mapNavigation",
+      "colorAxis",
+      "drilldown",
+      "drilldown.series",
+      "navigation",
+      "responsive",
+      "credits",
+      "time",
+      "annotations",
+      "data",
+      "accessibility",
+      "boost"
+    ],
+    "gantt": [
+      "chart",
+      "chart.type",
+      "title",
+      "title.text",
+      "subtitle",
+      "subtitle.text",
+      "xAxis",
+      "xAxis.type",
+      "xAxis.categories",
+      "xAxis.min",
+      "xAxis.max",
+      "yAxis",
+      "yAxis.type",
+      "yAxis.min",
+      "yAxis.max",
+      "yAxis.title.text",
+      "legend",
+      "tooltip",
+      "tooltip.shared",
+      "tooltip.outside",
+      "tooltip.useHTML",
+      "tooltip.formatter_id",
+      "tooltip.pointFormat",
+      "tooltip.valueSuffix",
+      "plotOptions",
+      "series",
+      "series[].type",
+      "series[].name",
+      "series[].data",
+      "series[].id",
+      "series[].drilldown",
+      "series[].custom",
+      "drilldown",
+      "drilldown.series",
+      "navigation",
+      "responsive",
+      "credits",
+      "time",
+      "annotations",
+      "data",
+      "accessibility",
+      "boost"
+    ]
+  },
+  "allowed_option_paths": [
+    "accessibility",
+    "annotations",
+    "boost",
+    "caption",
+    "caption.text",
+    "chart",
+    "chart.type",
+    "chart.zoomType",
+    "colorAxis",
+    "credits",
+    "data",
+    "drilldown",
+    "drilldown.series",
+    "legend",
+    "mapNavigation",
+    "mapView",
+    "navigation",
+    "navigator",
+    "plotOptions",
+    "rangeSelector",
+    "responsive",
+    "scrollbar",
+    "series",
+    "series[].custom",
+    "series[].data",
+    "series[].drilldown",
+    "series[].id",
+    "series[].joinBy",
+    "series[].keys",
+    "series[].mapData",
+    "series[].name",
+    "series[].type",
+    "subtitle",
+    "subtitle.text",
+    "time",
+    "title",
+    "title.text",
+    "tooltip",
+    "tooltip.formatter_id",
+    "tooltip.outside",
+    "tooltip.pointFormat",
+    "tooltip.shared",
+    "tooltip.useHTML",
+    "tooltip.valueSuffix",
+    "xAxis",
+    "xAxis.categories",
+    "xAxis.max",
+    "xAxis.min",
+    "xAxis.type",
+    "yAxis",
+    "yAxis.max",
+    "yAxis.min",
+    "yAxis.title.text",
+    "yAxis.type",
+    "zAxis"
+  ],
+  "callback_ids_by_kind": {
+    "tooltip.formatter": [
+      "tooltip_currency_usd",
+      "tooltip_datetime_short",
+      "tooltip_number_compact",
+      "tooltip_percent_1dp"
+    ],
+    "drilldown.loader": [
+      "drilldown_embedded_series"
+    ]
+  },
+  "callback_ids": [
+    "tooltip_currency_usd",
+    "tooltip_datetime_short",
+    "tooltip_number_compact",
+    "tooltip_percent_1dp"
+  ],
+  "capability_version": "hc-cap-v2-56ca70ab44f1"
+}

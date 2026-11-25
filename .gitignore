@@ -1,0 +1,46 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist/desktop-runtime
+dist-ssr
+.tmp
+.release-cache
+*.local
+internal/webui/dist
+server/internal/webui/dist
+src-tauri/binaries/ai-analyst-server-*
+src-tauri/gen
+src-tauri/resources/runtime
+src-tauri/target
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Local planning/reference docs
+docs/databricks.md
+
+# Local credentials, runtime state, and generated outputs
+.local-db*
+.env
+.env.*
+.claude/settings.local.json
+activation_private.pem
+service-account.json
+server/ai-analyst
+test-results/

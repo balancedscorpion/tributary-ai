@@ -1,0 +1,1746 @@
+/*
+ * Connections console — "control console" aesthetic.
+ * All rules are scoped under .cx-console so they never leak into the rest of
+ * the settings dialog or the shadcn/Tailwind layer.
+ */
+.cx-console {
+  --cx-bg: #0a0a0c;
+  --cx-card: #0f0f12;
+  --cx-card-hi: #15151a;
+  --cx-line: rgba(255, 255, 255, 0.07);
+  --cx-line-hi: rgba(255, 255, 255, 0.14);
+  --cx-text: #ece9e4;
+  --cx-text-2: #9a9aa2;
+  --cx-text-3: #8c8c93;
+  /* Matches --cx-text-3: the old #646469 fell below WCAG 4.5:1 for the
+   * 10.5–11px metadata that uses this token. */
+  --cx-text-faint: #8c8c93;
+  --cx-accent: #f2782e;
+  --cx-accent-hi: #ff924a;
+  --cx-ink: #1d1305;
+  --cx-live: #36c77f;
+  --cx-warn: #e8b04b;
+
+  position: relative;
+  color: var(--cx-text);
+  font-family: "Hanken Grotesk", -apple-system, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  border-radius: 8px;
+  padding: 30px 26px 34px;
+  background: var(--cx-bg);
+  border: 1px solid var(--cx-line);
+}
+
+.cx-console *,
+.cx-console *::before,
+.cx-console *::after {
+  box-sizing: border-box;
+}
+
+.cx-kicker {
+  font: 500 11px/1 "JetBrains Mono", monospace;
+  letter-spacing: 0;
+  color: var(--cx-accent);
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+
+.cx-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 26px;
+}
+.cx-title {
+  font-family: "Bricolage Grotesque", sans-serif;
+  font-weight: 600;
+  font-size: 28px;
+  letter-spacing: 0;
+  line-height: 1;
+  margin: 0;
+}
+.cx-sub {
+  color: var(--cx-text-2);
+  font-size: 14px;
+  margin-top: 11px;
+  max-width: 42ch;
+  line-height: 1.5;
+}
+.cx-head-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+  padding-top: 4px;
+}
+.cx-counter {
+  font: 400 12px/1 "JetBrains Mono", monospace;
+  color: var(--cx-text-3);
+  white-space: nowrap;
+}
+.cx-counter b {
+  color: var(--cx-text);
+  font-weight: 500;
+}
+
+.cx-btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 16px;
+  border-radius: 8px;
+  border: 1px solid var(--cx-line-hi);
+  background: transparent;
+  color: var(--cx-text);
+  font: 600 13px/1 inherit;
+  cursor: pointer;
+  transition: background 0.18s, border-color 0.18s;
+}
+.cx-btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.22);
+}
+.cx-btn-ghost svg {
+  width: 15px;
+  height: 15px;
+}
+
+.cx-list {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+.cx-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  text-align: center;
+  padding: 46px 24px;
+  border: 1px dashed var(--cx-line-hi);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.012);
+}
+.cx-empty-title {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+.cx-empty-sub {
+  font-size: 13px;
+  color: var(--cx-text-2);
+  max-width: 38ch;
+  line-height: 1.5;
+}
+
+.cx-conn {
+  background: var(--cx-card);
+  border: 1px solid var(--cx-line);
+  border-radius: 8px;
+  padding: 18px 20px;
+  opacity: 0;
+  transform: translateY(10px);
+  animation: cx-rise 0.55s cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
+  transition: border-color 0.2s, background 0.2s;
+}
+/* Hover emphasis only on devices that truly hover, so a card never appears
+ * stuck in a selected/hover state after a click or on touch input. */
+@media (hover: hover) and (pointer: fine) {
+  .cx-conn:hover {
+    background: var(--cx-card-hi);
+    border-color: var(--cx-line-hi);
+  }
+}
+@keyframes cx-rise {
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.cx-head-row {
+  display: grid;
+  grid-template-columns: 46px 1fr auto;
+  align-items: center;
+  gap: 17px;
+}
+.cx-ic {
+  width: 46px;
+  height: 46px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #1a1a1f;
+  border: 1px solid var(--cx-line);
+  color: #f4f2ee;
+}
+.cx-ic svg {
+  width: 23px;
+  height: 23px;
+}
+.cx-ic img.cx-logo {
+  width: 24px;
+  height: 24px;
+  max-width: 24px;
+  max-height: 24px;
+  object-fit: contain;
+  display: block;
+  pointer-events: none;
+}
+/* Inherently dark/monochrome marks (e.g. GitHub) render light on the dark tile. */
+.cx-ic.cx-mono img.cx-logo {
+  filter: brightness(0) invert(1);
+}
+
+.cx-eyebrow {
+  font: 500 10.5px/1 "JetBrains Mono", monospace;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  color: var(--cx-text-3);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 7px;
+  height: 11px;
+}
+.cx-eyebrow.cx-live {
+  color: var(--cx-live);
+}
+.cx-eyebrow.cx-warn {
+  color: var(--cx-warn);
+}
+.cx-eyebrow .cx-checked {
+  color: var(--cx-text-3);
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+.cx-cname {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0;
+  line-height: 1;
+}
+.cx-instruct {
+  font-size: 13px;
+  color: var(--cx-text-2);
+  margin-top: 7px;
+  line-height: 1.45;
+}
+.cx-instruct b {
+  color: var(--cx-text);
+  font-weight: 500;
+}
+.cx-body {
+  min-width: 0;
+}
+
+.cx-livedot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--cx-live);
+  position: relative;
+  flex-shrink: 0;
+}
+.cx-livedot::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border: 1px solid var(--cx-live);
+  opacity: 0.55;
+  animation: cx-ping 1.9s ease-out infinite;
+}
+@keyframes cx-ping {
+  0% {
+    transform: scale(0.55);
+    opacity: 0.55;
+  }
+  70%,
+  100% {
+    transform: scale(1.9);
+    opacity: 0;
+  }
+}
+
+/*
+ * One next action per row. The action column is a fixed two-slot grid: a
+ * right-aligned primary control (button / enable pill / toggle) and a reserved
+ * manage slot. Reserving the manage slot keeps every primary's right edge on
+ * the same vertical line so the orange Connect / Set up buttons align down the
+ * column, whether or not a given row exposes a details chevron.
+ */
+.cx-action {
+  display: grid;
+  grid-template-columns: 1fr 34px;
+  align-items: center;
+  gap: 8px;
+  min-width: 196px;
+}
+.cx-action-primary {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.cx-action-manage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.cx-swap {
+  animation: cx-swapin 0.28s ease;
+}
+@keyframes cx-swapin {
+  from {
+    opacity: 0;
+    transform: translateX(5px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.cx-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 39px;
+  min-width: 150px;
+  padding: 0 19px;
+  border: none;
+  border-radius: 8px;
+  background: var(--cx-accent);
+  color: var(--cx-ink);
+  font: 600 13.5px/1 inherit;
+  letter-spacing: 0;
+  cursor: pointer;
+  transition: background 0.18s, transform 0.18s, box-shadow 0.18s;
+}
+.cx-btn-primary:hover {
+  background: var(--cx-accent-hi);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 22px -8px rgba(242, 120, 46, 0.6);
+}
+.cx-btn-primary[disabled] {
+  opacity: 0.8;
+  cursor: default;
+  transform: none;
+  box-shadow: none;
+}
+.cx-btn-primary svg {
+  width: 15px;
+  height: 15px;
+  transition: transform 0.18s;
+}
+.cx-btn-primary:hover svg.cx-arr {
+  transform: translateX(3px);
+}
+
+.cx-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 39px;
+  padding: 0 15px;
+  border-radius: 8px;
+  border: 1px solid var(--cx-line-hi);
+  background: rgba(255, 255, 255, 0.025);
+  color: var(--cx-text);
+  font: 600 13px/1 inherit;
+  cursor: pointer;
+  transition: background 0.16s, border-color 0.16s;
+}
+.cx-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.22);
+}
+.cx-btn-secondary[disabled] {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.cx-spin {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid rgba(29, 19, 5, 0.35);
+  border-top-color: var(--cx-ink);
+  animation: cx-rot 0.7s linear infinite;
+}
+.cx-spin.cx-spin-ghost {
+  border-color: rgba(255, 255, 255, 0.25);
+  border-top-color: var(--cx-text);
+}
+@keyframes cx-rot {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.cx-enable-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 13px;
+  height: 39px;
+  min-width: 150px;
+  padding: 0 9px 0 16px;
+  border-radius: 8px;
+  border: 1px solid var(--cx-line-hi);
+  background: rgba(255, 255, 255, 0.025);
+}
+.cx-enable-lbl {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+.cx-switch {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  /* 24px minimum interactive target height (WCAG 2.5.8). */
+  height: 24px;
+  flex-shrink: 0;
+}
+.cx-switch input {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  cursor: pointer;
+}
+.cx-track {
+  position: absolute;
+  inset: 0;
+  background: #34343b;
+  border-radius: 999px;
+  pointer-events: none;
+  transition: background 0.2s;
+}
+.cx-track::before {
+  content: "";
+  position: absolute;
+  width: 17px;
+  height: 17px;
+  left: 3px;
+  top: 3.5px;
+  border-radius: 50%;
+  background: #e9e7e2;
+  transition: transform 0.2s;
+}
+.cx-switch input:checked + .cx-track {
+  background: var(--cx-accent);
+}
+.cx-switch input:checked + .cx-track::before {
+  transform: translateX(17px);
+  background: #fff;
+}
+.cx-switch input:focus-visible + .cx-track {
+  outline: 2px solid var(--cx-accent);
+  outline-offset: 2px;
+}
+
+.cx-iconbtn {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--cx-text-3);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.16s, color 0.16s;
+}
+.cx-iconbtn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--cx-text-2);
+}
+.cx-iconbtn svg {
+  width: 17px;
+  height: 17px;
+  transition: transform 0.2s;
+}
+.cx-iconbtn.cx-open svg {
+  transform: rotate(180deg);
+}
+
+.cx-feedback {
+  margin-top: 13px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--cx-text-2);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.cx-feedback.cx-feedback-err {
+  color: var(--cx-warn);
+}
+.cx-feedback a {
+  color: var(--cx-text);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.cx-feedback code {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+  color: var(--cx-text);
+}
+.cx-feedback .cx-relink {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  font-size: 12px;
+  color: var(--cx-text);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+.cx-feedback .cx-relink:hover {
+  color: var(--cx-accent-hi);
+}
+
+.cx-drawer {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.28s ease;
+}
+.cx-drawer.cx-open {
+  grid-template-rows: 1fr;
+}
+.cx-drawer > div {
+  overflow: hidden;
+}
+.cx-drawer-pad {
+  margin-top: 17px;
+  padding-top: 16px;
+  border-top: 1px solid var(--cx-line);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Section heading separating optional/advanced fields from required ones. */
+.cx-advanced-label {
+  font: 500 10.5px/1 "JetBrains Mono", monospace;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  color: var(--cx-text-faint);
+  margin-top: 2px;
+}
+
+/* Destructive / management actions (disconnect, remove) live at the foot of
+ * the details drawer — never as a persistent top-level icon. */
+.cx-drawer-manage {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-top: 2px;
+  padding-top: 14px;
+  border-top: 1px solid var(--cx-line);
+}
+.cx-drawer-manage .cx-link[disabled] {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.cx-field-label {
+  font: 500 11px/1 "JetBrains Mono", monospace;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  color: var(--cx-text-3);
+  margin-bottom: 9px;
+  display: block;
+}
+.cx-field-row {
+  display: flex;
+  gap: 9px;
+}
+.cx-input {
+  flex: 1;
+  min-width: 0;
+  height: 39px;
+  border-radius: 8px;
+  border: 1px solid var(--cx-line-hi);
+  background: #0c0c0f;
+  color: var(--cx-text);
+  font: 400 13.5px/1 inherit;
+  padding: 0 14px;
+  outline: none;
+  transition: border-color 0.16s;
+}
+.cx-input.cx-mono {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12.5px;
+}
+.cx-input.cx-textarea {
+  height: auto;
+  min-height: 108px;
+  padding-top: 11px;
+  padding-bottom: 11px;
+  resize: vertical;
+  line-height: 1.45;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px;
+}
+.cx-input:focus {
+  border-color: var(--cx-accent);
+}
+.cx-input::placeholder {
+  color: var(--cx-text-3);
+}
+.cx-help {
+  font-size: 11.5px;
+  color: var(--cx-text-3);
+  margin-top: 7px;
+  line-height: 1.5;
+}
+.cx-detected-project {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 9px;
+  color: var(--cx-text-3);
+  font: 500 11px/1 "JetBrains Mono", monospace;
+}
+.cx-detected-project span {
+  text-transform: uppercase;
+}
+.cx-detected-project code {
+  color: var(--cx-text);
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid var(--cx-line);
+  border-radius: 6px;
+  padding: 4px 7px;
+  font: inherit;
+}
+.cx-detected-project button {
+  border: 0;
+  background: transparent;
+  color: var(--cx-accent);
+  cursor: pointer;
+  font: inherit;
+  padding: 3px 0;
+}
+.cx-detected-project button:hover {
+  color: var(--cx-accent-2);
+}
+.cx-btn-save {
+  height: 39px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--cx-text);
+  font: 600 13px/1 inherit;
+  cursor: pointer;
+  transition: background 0.16s;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  white-space: nowrap;
+}
+.cx-btn-save:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+.cx-btn-save[disabled] {
+  opacity: 0.5;
+  cursor: default;
+}
+.cx-btn-save svg {
+  width: 14px;
+  height: 14px;
+}
+
+.cx-meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  font-size: 13px;
+}
+.cx-meta-row .cx-k {
+  color: var(--cx-text-3);
+  flex-shrink: 0;
+}
+.cx-meta-row .cx-v {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px;
+  color: var(--cx-text-2);
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cx-meta-row .cx-v .cx-v-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cx-meta-row .cx-v .cx-reconnect {
+  flex-shrink: 0;
+}
+.cx-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--cx-text-3);
+  font: 600 12.5px/1 inherit;
+  cursor: pointer;
+  transition: color 0.16s;
+}
+.cx-link:hover {
+  color: var(--cx-text);
+}
+.cx-link.cx-link-warn:hover {
+  color: var(--cx-warn);
+}
+.cx-link svg {
+  width: 14px;
+  height: 14px;
+}
+
+.cx-seg {
+  display: flex;
+  gap: 8px;
+}
+.cx-seg-btn {
+  flex: 1;
+  border: 1px solid var(--cx-line-hi);
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--cx-text-2);
+  border-radius: 8px;
+  padding: 9px 12px;
+  font: 600 12.5px/1.3 inherit;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.16s, background 0.16s, color 0.16s;
+}
+.cx-seg-btn .cx-seg-desc {
+  display: block;
+  margin-top: 5px;
+  font-weight: 400;
+  font-size: 11px;
+  color: var(--cx-text-3);
+  line-height: 1.4;
+}
+.cx-seg-btn.cx-on {
+  border-color: var(--cx-accent);
+  background: rgba(242, 120, 46, 0.07);
+  color: var(--cx-text);
+}
+
+.cx-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.cx-toggle-row .cx-tr-label {
+  font-size: 13px;
+  font-weight: 500;
+}
+.cx-toggle-row .cx-tr-desc {
+  font-size: 11.5px;
+  color: var(--cx-text-3);
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+/* Catalogue picker */
+.cx-cat-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  border-radius: 8px;
+  background: rgba(6, 6, 8, 0.72);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 40px 20px;
+  animation: cx-fade 0.18s ease;
+}
+@keyframes cx-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.cx-cat {
+  width: 100%;
+  max-width: 460px;
+  background: var(--cx-card);
+  border: 1px solid var(--cx-line-hi);
+  border-radius: 8px;
+  padding: 18px;
+  box-shadow: 0 26px 60px -24px rgba(0, 0, 0, 0.8);
+}
+.cx-cat-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.cx-cat-title {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+.cx-cat-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 52vh;
+  overflow-y: auto;
+}
+.cx-cat-item {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--cx-line);
+  background: rgba(255, 255, 255, 0.015);
+  border-radius: 8px;
+  padding: 11px 13px;
+  cursor: pointer;
+  color: var(--cx-text);
+  transition: border-color 0.16s, background 0.16s;
+}
+.cx-cat-item:hover:not([disabled]) {
+  border-color: var(--cx-line-hi);
+  background: rgba(255, 255, 255, 0.04);
+}
+.cx-cat-item[disabled] {
+  opacity: 0.45;
+  cursor: default;
+}
+.cx-cat-item .cx-ic {
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+}
+.cx-cat-item .cx-ic svg {
+  width: 19px;
+  height: 19px;
+}
+.cx-cat-item .cx-ic img.cx-logo {
+  width: 21px;
+  height: 21px;
+}
+/* Compact "add" affordance on each catalogue card. */
+.cx-cat-add {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  border: 1px solid var(--cx-line-hi);
+  background: rgba(255, 255, 255, 0.025);
+  color: var(--cx-text-2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.16s, color 0.16s, border-color 0.16s;
+}
+.cx-cat-item:hover:not([disabled]) .cx-cat-add {
+  background: var(--cx-accent);
+  border-color: var(--cx-accent);
+  color: var(--cx-ink);
+}
+.cx-cat-add svg {
+  width: 15px;
+  height: 15px;
+}
+.cx-cat-meta {
+  min-width: 0;
+  flex: 1;
+}
+.cx-cat-name {
+  font-size: 13.5px;
+  font-weight: 600;
+}
+.cx-cat-desc {
+  font-size: 11.5px;
+  color: var(--cx-text-3);
+  margin-top: 2px;
+}
+.cx-cat-added {
+  font: 500 10px/1 "JetBrains Mono", monospace;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  color: var(--cx-text-3);
+}
+
+.cx-console :focus-visible {
+  outline: 2px solid var(--cx-accent);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+/*
+ * Setup window — the focused setup surface for credential-heavy connections.
+ * Multi-field setup never expands inside a list row; instead the list is dimmed
+ * behind a centered window with its own scrolling body.
+ */
+.cx-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(4, 4, 6, 0.58);
+  backdrop-filter: blur(3px);
+  opacity: 0;
+  transition: opacity 0.26s ease;
+}
+.cx-sheet-backdrop.cx-shown {
+  opacity: 1;
+}
+.cx-sheet {
+  position: relative;
+  width: min(640px, 100%);
+  max-width: 100%;
+  max-height: min(720px, calc(100vh - 96px));
+  display: flex;
+  flex-direction: column;
+  background: #0e0e12;
+  border: 1px solid var(--cx-line-hi);
+  border-radius: 10px;
+  box-shadow: 0 28px 90px -28px rgba(0, 0, 0, 0.92);
+  overflow: hidden;
+  transform: translateY(10px) scale(0.985);
+  opacity: 0;
+  transition: transform 0.3s cubic-bezier(0.22, 0.7, 0.27, 1), opacity 0.3s ease;
+}
+.cx-sheet.cx-shown {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
+
+.cx-sheet-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 20px 20px 17px;
+  border-bottom: 1px solid var(--cx-line);
+  flex-shrink: 0;
+}
+.cx-sheet-head .cx-ic {
+  width: 42px;
+  height: 42px;
+}
+.cx-sheet-titles {
+  flex: 1;
+  min-width: 0;
+}
+.cx-sheet-titles .cx-eyebrow {
+  margin-bottom: 6px;
+}
+.cx-sheet-title {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0;
+  line-height: 1;
+}
+.cx-sheet-x {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--cx-text-3);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.16s, color 0.16s;
+}
+.cx-sheet-x:hover {
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--cx-text);
+}
+.cx-sheet-x svg {
+  width: 18px;
+  height: 18px;
+}
+
+.cx-sheet-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.cx-callout {
+  display: flex;
+  gap: 10px;
+  padding: 13px 14px;
+  border: 1px solid var(--cx-line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.02);
+}
+.cx-callout svg {
+  width: 16px;
+  height: 16px;
+  color: var(--cx-accent);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.cx-callout p {
+  font-size: 12.5px;
+  color: var(--cx-text-2);
+  line-height: 1.5;
+}
+.cx-callout a {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--cx-text);
+  text-decoration: none;
+  border-bottom: 1px solid var(--cx-line-hi);
+  white-space: nowrap;
+}
+.cx-callout a:hover {
+  border-color: var(--cx-accent);
+}
+.cx-callout a svg {
+  width: 12px;
+  height: 12px;
+  color: inherit;
+}
+
+/* Amber variant used when Google sign-in has expired or gcloud is missing. */
+.cx-callout.cx-callout-warn {
+  border-color: rgba(232, 176, 75, 0.35);
+  background: rgba(232, 176, 75, 0.06);
+}
+.cx-callout.cx-callout-warn svg {
+  color: var(--cx-warn);
+}
+
+/* Running re-auth row: spinner + status text + always-available Cancel. */
+.cx-reauth {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 14px;
+  border: 1px solid var(--cx-line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.02);
+}
+.cx-reauth.cx-reauth-running {
+  border-color: rgba(232, 176, 75, 0.3);
+  background: rgba(232, 176, 75, 0.05);
+}
+.cx-reauth .cx-spin {
+  flex-shrink: 0;
+}
+.cx-reauth-text {
+  flex: 1;
+  min-width: 0;
+}
+.cx-reauth-text strong {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--cx-text);
+}
+.cx-reauth-text p {
+  margin-top: 3px;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--cx-text-3);
+}
+.cx-reauth .cx-btn-ghost-sm {
+  flex-shrink: 0;
+}
+
+.cx-reauth-fallback {
+  flex: 1;
+  min-width: 0;
+}
+.cx-reauth-fallback p {
+  font-size: 12.5px;
+  color: var(--cx-text-2);
+  line-height: 1.5;
+}
+.cx-reauth-fallback .cx-help {
+  margin-top: 7px;
+}
+.cx-reauth-fallback .cx-help a {
+  color: var(--cx-text);
+  text-decoration: none;
+  border-bottom: 1px solid var(--cx-line-hi);
+}
+.cx-reauth-fallback .cx-help a:hover {
+  border-color: var(--cx-accent);
+}
+
+/* Copyable shell command (gcloud auth application-default login). */
+.cx-cmd {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 9px;
+  padding: 8px 10px;
+  border-radius: 7px;
+  border: 1px solid var(--cx-line);
+  background: rgba(0, 0, 0, 0.35);
+}
+.cx-cmd code {
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+  white-space: nowrap;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11.5px;
+  color: var(--cx-text);
+  user-select: all;
+}
+.cx-cmd .cx-secret-reveal {
+  flex-shrink: 0;
+}
+
+.cx-req {
+  color: var(--cx-accent);
+  margin-left: 3px;
+}
+.cx-field-opt {
+  color: var(--cx-text-faint);
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 500;
+}
+
+/* Masked secret entry with a reveal toggle. */
+.cx-secret-reveal {
+  border: none;
+  background: transparent;
+  color: var(--cx-text-3);
+  cursor: pointer;
+  padding: 0 4px;
+  font: 500 11px/1 "JetBrains Mono", monospace;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.cx-secret-reveal:hover {
+  color: var(--cx-text);
+}
+
+.cx-test {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.cx-btn-ghost-sm {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 8px;
+  border: 1px solid var(--cx-line-hi);
+  background: transparent;
+  color: var(--cx-text);
+  font: 600 12.5px/1 inherit;
+  cursor: pointer;
+  transition: background 0.16s, border-color 0.16s;
+}
+.cx-btn-ghost-sm:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.22);
+}
+.cx-btn-ghost-sm[disabled] {
+  opacity: 0.55;
+  cursor: default;
+}
+.cx-btn-ghost-sm svg {
+  width: 14px;
+  height: 14px;
+}
+.cx-test-ok {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font: 500 12px/1 "JetBrains Mono", monospace;
+  color: var(--cx-live);
+}
+.cx-test-ok .cx-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--cx-live);
+}
+
+/* Manage/destructive actions live at the foot of the sheet body. */
+.cx-sheet-manage {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-top: 2px;
+  padding-top: 16px;
+  border-top: 1px solid var(--cx-line);
+}
+.cx-sheet-manage .cx-link[disabled] {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.cx-sheet-foot {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px 20px;
+  border-top: 1px solid var(--cx-line);
+  background: #0e0e12;
+  flex-shrink: 0;
+}
+.cx-sheet-reason {
+  font-size: 11.5px;
+  color: var(--cx-text-3);
+  line-height: 1.45;
+}
+.cx-sheet-reason.cx-sheet-reason-err {
+  color: var(--cx-warn);
+}
+.cx-sheet-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  height: 44px;
+  border: none;
+  border-radius: 8px;
+  background: var(--cx-accent);
+  color: var(--cx-ink);
+  font: 600 14px/1 inherit;
+  letter-spacing: 0;
+  cursor: pointer;
+  transition: background 0.18s, opacity 0.18s;
+}
+.cx-sheet-primary:hover:not([disabled]) {
+  background: var(--cx-accent-hi);
+}
+.cx-sheet-primary[disabled] {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.cx-sheet-primary svg {
+  width: 15px;
+  height: 15px;
+  transition: transform 0.18s;
+}
+.cx-sheet-primary:hover:not([disabled]) svg.cx-arr {
+  transform: translateX(3px);
+}
+
+/*
+ * Advanced disclosure (Surface B) — optional auth configuration such as a
+ * custom OAuth client ID lives here, collapsed by default. It never gates setup.
+ */
+.cx-disc {
+  border-top: 1px solid var(--cx-line);
+  padding-top: 15px;
+}
+.cx-disc-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font: 500 10.5px/1 "JetBrains Mono", monospace;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  color: var(--cx-text-3);
+  transition: color 0.16s;
+}
+.cx-disc-btn:hover {
+  color: var(--cx-text-2);
+}
+.cx-disc-btn svg {
+  width: 13px;
+  height: 13px;
+  transition: transform 0.2s;
+}
+.cx-disc-btn[aria-expanded="true"] svg {
+  transform: rotate(180deg);
+}
+.cx-disc-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+/*
+ * Surface C — management drawer. Read-only confirmation rows, per-tool
+ * enablement toggles and optional scope refinement. No sign-in inputs here.
+ */
+.cx-sec {
+  font: 500 10.5px/1 "JetBrains Mono", monospace;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  color: var(--cx-text-3);
+  margin: 6px 0 0;
+}
+.cx-gd {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--cx-live);
+  flex-shrink: 0;
+}
+.cx-reconnect {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  color: var(--cx-text);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  margin-left: 9px;
+}
+.cx-reconnect:hover {
+  color: var(--cx-accent-hi);
+}
+.cx-tools {
+  display: flex;
+  flex-direction: column;
+}
+.cx-tools.cx-dim {
+  opacity: 0.4;
+  pointer-events: none;
+}
+.cx-tool {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 14px;
+  padding: 11px 0;
+}
+.cx-tool + .cx-tool {
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+}
+.cx-tname {
+  font-size: 13.5px;
+  font-weight: 500;
+}
+.cx-tdesc {
+  font-size: 12px;
+  color: var(--cx-text-3);
+  margin-top: 3px;
+  line-height: 1.4;
+}
+.cx-scope-inp {
+  margin-top: 2px;
+}
+
+.cx-local-folders {
+  border: 1px solid var(--cx-line);
+  border-radius: 8px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.02);
+}
+.cx-local-folders-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+.cx-local-folder-empty {
+  margin-top: 12px;
+  color: var(--cx-text-3);
+  font-size: 12.5px;
+}
+.cx-local-folder-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+.cx-local-folder {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  min-height: 34px;
+  padding: 7px 8px 7px 10px;
+  border: 1px solid var(--cx-line);
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.16);
+  color: var(--cx-text-2);
+  font: 500 12.5px/1.35 inherit;
+}
+.cx-local-folder span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cx-local-folder-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--cx-text-3);
+  cursor: pointer;
+}
+.cx-local-folder-remove:hover {
+  color: var(--cx-warn);
+  background: rgba(255, 255, 255, 0.05);
+}
+.cx-local-folder-remove svg {
+  width: 14px;
+  height: 14px;
+}
+.cx-local-scope-note {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid var(--cx-line);
+  border-radius: 8px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.02);
+}
+.cx-local-scope-note span {
+  color: var(--cx-text-3);
+  font-size: 12px;
+}
+.cx-local-scope-note strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--cx-text);
+  font-size: 13px;
+}
+.cx-readonly-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 42px;
+  height: 26px;
+  border: 1px solid var(--cx-line-hi);
+  border-radius: 999px;
+  color: var(--cx-text-3);
+  background: rgba(255, 255, 255, 0.03);
+  font: 600 11.5px/1 inherit;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cx-console *,
+  .cx-console *::before,
+  .cx-console *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+  .cx-conn {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (max-width: 560px) {
+  .cx-header {
+    flex-direction: column;
+    gap: 16px;
+  }
+  .cx-head-right {
+    align-items: flex-start;
+  }
+  .cx-head-row {
+    grid-template-columns: 46px 1fr;
+    row-gap: 14px;
+  }
+  .cx-action {
+    grid-column: 1 / -1;
+    grid-template-columns: 1fr auto;
+    min-width: 0;
+  }
+  .cx-action-primary {
+    justify-content: flex-start;
+  }
+  .cx-sheet-backdrop {
+    align-items: stretch;
+    padding: 12px;
+  }
+  .cx-sheet {
+    width: 100%;
+    max-height: 100%;
+  }
+}
+
+/* --- arXiv papers panel & viewer --------------------------------------------- */
+
+.cx-console .cx-ax-panel,
+.cx-console .cx-ax-viewer {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+.cx-console .cx-ax-seg {
+  align-self: flex-start;
+}
+
+.cx-console .cx-ax-search-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cx-console .cx-ax-grow {
+  flex: 1;
+  min-width: 0;
+}
+
+.cx-console .cx-ax-search-btn-wrap {
+  display: flex;
+  align-items: flex-end;
+  padding-bottom: 1px;
+}
+
+.cx-console .cx-ax-count {
+  font-size: 12px;
+  color: var(--cx-text-3);
+}
+
+.cx-console .cx-ax-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cx-console .cx-ax-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border: 1px solid var(--cx-line);
+  border-radius: 8px;
+  background: var(--cx-card);
+}
+
+.cx-console .cx-ax-row:hover {
+  border-color: var(--cx-line-hi);
+  background: var(--cx-card-hi);
+}
+
+.cx-console .cx-ax-row-main {
+  min-width: 0;
+  flex: 1;
+}
+
+.cx-console .cx-ax-title {
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--cx-text);
+}
+
+.cx-console .cx-ax-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  margin-top: 4px;
+  font-size: 11.5px;
+  color: var(--cx-text-3);
+  align-items: center;
+}
+
+.cx-console .cx-ax-id {
+  font-family: "SFMono-Regular", ui-monospace, Menlo, monospace;
+  color: var(--cx-text-2);
+}
+
+.cx-console .cx-ax-chip {
+  border: 1px solid var(--cx-line-hi);
+  border-radius: 999px;
+  padding: 1px 7px;
+  font-size: 10.5px;
+  color: var(--cx-text-2);
+  white-space: nowrap;
+}
+
+.cx-console .cx-ax-state-ok { color: var(--cx-live); }
+.cx-console .cx-ax-state-warn { color: var(--cx-warn); }
+.cx-console .cx-ax-state-muted { color: var(--cx-text-faint); }
+
+.cx-console .cx-ax-abstract {
+  margin-top: 6px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--cx-text-2);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.cx-console .cx-ax-row-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.cx-console .cx-ax-loading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--cx-text-3);
+  font-size: 12.5px;
+  padding: 14px 2px;
+}
+
+/* Viewer host: the paper viewer itself is the shared <ArxivPaperViewer>
+   (components/arxiv/arxivViewer.css, `axv-` prefix); this wrapper only keeps
+   the wide-sheet :has() rule below working and provides flex context. */
+
+@media (prefers-reduced-motion: reduce) {
+  .cx-console .cx-ax-row {
+    transition: none;
+  }
+}
+
+/* The paper browser/viewer benefits from a wider sheet than setup forms.
+   :has() is supported by the app's WebView targets; older engines keep the
+   default 640px sheet, which remains fully functional. */
+.cx-sheet:has(.cx-ax-panel),
+.cx-sheet:has(.cx-ax-viewer) {
+  width: min(920px, 100%);
+  max-height: min(860px, calc(100vh - 64px));
+}
+
+/* --- Setup-UX pass: universal management, guards, a11y ---------------------- */
+
+/* Screen-reader-only text (e.g. "(required)" alongside the visual asterisk). */
+.cx-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Universal sheet danger zone: sign out + two-step remove for every
+ * connection, rendered regardless of health so broken rows stay escapable. */
+.cx-danger {
+  margin-top: 2px;
+  padding-top: 16px;
+  border-top: 1px solid var(--cx-line);
+}
+.cx-danger-title {
+  font: 500 11px/1 "JetBrains Mono", monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--cx-text-3);
+  margin-bottom: 12px;
+}
+.cx-danger-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 20px;
+}
+.cx-danger .cx-link[disabled] {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* Two-step inline remove confirmation (drawer + danger zone). */
+.cx-remove-confirm {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--cx-warn);
+}
+
+/* Unsaved-changes guard shown between sheet body and footer on dirty close. */
+.cx-sheet-guard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 12px 20px;
+  border-top: 1px solid var(--cx-warn);
+  background: rgba(232, 176, 75, 0.08);
+}
+.cx-sheet-guard p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--cx-warn);
+}
+.cx-sheet-guard-actions {
+  display: inline-flex;
+  gap: 8px;
+}
+.cx-guard-discard {
+  color: var(--cx-warn);
+  border-color: rgba(232, 176, 75, 0.45);
+}
+
+/* Inline console notice (e.g. deep-link target not in the catalogue). */
+.cx-console-notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}

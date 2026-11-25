@@ -1,0 +1,4 @@
+{
+  "name": "Custom Stream Chat",
+  "description": "A high-performance React chat interface compatible with OpenAI Chat Completions API. Features Server-Sent Events (SSE) streaming, markdown rendering, custom endpoint configuration, and extensibility for tool calls with BigQuery visualization."
+}

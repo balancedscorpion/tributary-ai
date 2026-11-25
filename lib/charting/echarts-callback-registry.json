@@ -1,0 +1,30 @@
+{
+  "schema_version": "echarts-callback-registry.v1",
+  "callbacks": [
+    {
+      "id": "echarts_tooltip_compact",
+      "kind": "tooltip.formatter",
+      "description": "Formats numeric values in compact notation (for example, 1.2K)."
+    },
+    {
+      "id": "echarts_tooltip_currency",
+      "kind": "tooltip.formatter",
+      "description": "Formats numeric values as USD currency."
+    },
+    {
+      "id": "echarts_tooltip_percent_1dp",
+      "kind": "tooltip.formatter",
+      "description": "Formats numeric values as percent with one decimal place."
+    },
+    {
+      "id": "drilldown_embedded_series",
+      "kind": "drilldown.loader",
+      "description": "Loads drilldown series from echarts_spec.extensions.drilldown_async.series_by_id."
+    },
+    {
+      "id": "custom_render_rect",
+      "kind": "series.custom.render_item",
+      "description": "Renders safe rectangle primitives for custom series via render_item_id."
+    }
+  ]
+}

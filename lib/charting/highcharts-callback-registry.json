@@ -1,0 +1,30 @@
+{
+  "schema_version": "highcharts-callback-registry.v1",
+  "callbacks": [
+    {
+      "id": "tooltip_number_compact",
+      "kind": "tooltip.formatter",
+      "description": "Formats numeric point values in compact notation (e.g. 1.2K)."
+    },
+    {
+      "id": "tooltip_currency_usd",
+      "kind": "tooltip.formatter",
+      "description": "Formats numeric point values as USD currency."
+    },
+    {
+      "id": "tooltip_percent_1dp",
+      "kind": "tooltip.formatter",
+      "description": "Formats numeric point values as percent with one decimal."
+    },
+    {
+      "id": "tooltip_datetime_short",
+      "kind": "tooltip.formatter",
+      "description": "Formats X values as short local date/time labels."
+    },
+    {
+      "id": "drilldown_embedded_series",
+      "kind": "drilldown.loader",
+      "description": "Loads drilldown series from chart_spec.extensions.drilldown_async.series_by_id."
+    }
+  ]
+}

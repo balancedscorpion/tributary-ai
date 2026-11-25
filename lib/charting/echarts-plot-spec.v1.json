@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "echarts-plot-spec.v1",
+  "title": "ECharts Plot Spec v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "module",
+    "options"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "echarts-plot-spec.v1"
+    },
+    "module": {
+      "type": "string",
+      "enum": [
+        "core",
+        "dataviz",
+        "graph",
+        "all"
+      ]
+    },
+    "modules": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "options": {
+      "type": "object",
+      "description": "ECharts option object. Callback surfaces are ID-based only (for example tooltip.formatter_id and series[].render_item_id for custom series).",
+      "additionalProperties": true
+    },
+    "extensions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "drilldown_async": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "loader_id",
+            "series_by_id"
+          ],
+          "properties": {
+            "loader_id": {
+              "type": "string"
+            },
+            "series_by_id": {
+              "type": "object",
+              "additionalProperties": true
+            },
+            "max_depth": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 8
+            }
+          }
+        }
+      }
+    }
+  }
+}

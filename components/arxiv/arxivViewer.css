@@ -1,0 +1,619 @@
+/*
+ * Shared arXiv paper viewer. Standalone stylesheet with a fresh `axv-` prefix
+ * so the viewer renders identically inside the settings side-sheet, the
+ * artifact inspector overlay, or any other host. Tokens mirror the Connections
+ * console / tool-audit aesthetic (dense, dark, orange accent) following the
+ * toolAudit.css pattern of self-contained scope tokens.
+ */
+.axv {
+  --axv-card: #0f0f12;
+  --axv-card-hi: #15151a;
+  --axv-line: rgba(255, 255, 255, 0.07);
+  --axv-line-hi: rgba(255, 255, 255, 0.14);
+  --axv-text: #ece9e4;
+  --axv-text-2: #9a9aa2;
+  --axv-text-3: #8c8c93;
+  --axv-accent: #f2782e;
+  --axv-accent-hi: #ff924a;
+  --axv-ink: #1d1305;
+  --axv-warn: #e8b04b;
+  --axv-mono: "SFMono-Regular", "JetBrains Mono", ui-monospace, Menlo, monospace;
+  /* Shared reading-column width for the body text and abstract card. A pixel
+     value (not ch) so both columns align despite different font sizes:
+     600px ≈ 74ch of the 14.5px serif body, ~67ch of text inside the padding. */
+  --axv-measure: 600px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+  min-height: 0;
+  flex: 1 1 auto;
+  color: var(--axv-text);
+  -webkit-font-smoothing: antialiased;
+}
+
+.axv *,
+.axv *::before,
+.axv *::after {
+  box-sizing: border-box;
+}
+
+/* ---- header ------------------------------------------------------------ */
+
+.axv-head {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+  flex-shrink: 0;
+}
+
+.axv-title {
+  margin: 0;
+  max-width: 72ch;
+  font-size: 17px;
+  font-weight: 650;
+  line-height: 1.4;
+  color: var(--axv-text);
+  /* Wrap at spaces first; only overlong tokens (URLs, raw TeX) break mid-word. */
+  overflow-wrap: break-word;
+  text-wrap: balance;
+}
+
+.axv-title:focus {
+  outline: none;
+}
+
+.axv-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  margin-top: 4px;
+  font-size: 11.5px;
+  color: var(--axv-text-3);
+  align-items: center;
+}
+
+.axv-id {
+  font-family: var(--axv-mono);
+  color: var(--axv-text-2);
+}
+
+.axv-state-warn {
+  color: var(--axv-warn);
+}
+
+/* ---- toolbar ------------------------------------------------------------ */
+
+.axv-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+.axv-toolbar-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Segmented text/PDF switch */
+.axv-seg {
+  display: inline-flex;
+  border: 1px solid var(--axv-line-hi);
+  border-radius: 8px;
+  overflow: hidden;
+  align-self: flex-start;
+}
+
+.axv-seg-btn {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--axv-text-2);
+  font: 600 12.5px/1 inherit;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: background 0.16s, color 0.16s;
+}
+
+.axv-seg-btn + .axv-seg-btn {
+  border-left: 1px solid var(--axv-line-hi);
+}
+
+.axv-seg-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--axv-text);
+}
+
+.axv-seg-btn.axv-on {
+  background: var(--axv-accent);
+  color: var(--axv-ink);
+}
+
+.axv-seg-btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* ---- buttons / links ----------------------------------------------------- */
+
+.axv-btn-primary,
+.axv-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 14px;
+  border-radius: 8px;
+  font: 600 12.5px/1 inherit;
+  cursor: pointer;
+  transition: background 0.16s, border-color 0.16s, color 0.16s;
+  white-space: nowrap;
+}
+
+.axv-btn-primary {
+  border: 1px solid var(--axv-accent);
+  background: var(--axv-accent);
+  color: var(--axv-ink);
+}
+
+.axv-btn-primary:hover:not(:disabled) {
+  background: var(--axv-accent-hi);
+  border-color: var(--axv-accent-hi);
+}
+
+.axv-btn-secondary {
+  border: 1px solid var(--axv-line-hi);
+  background: transparent;
+  color: var(--axv-text);
+}
+
+.axv-btn-secondary:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+.axv-btn-primary:disabled,
+.axv-btn-secondary:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.axv-link {
+  appearance: none;
+  border: 0;
+  background: none;
+  padding: 0;
+  font: 600 12.5px/1.3 inherit;
+  color: var(--axv-accent);
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.axv-link:hover {
+  color: var(--axv-accent-hi);
+  text-decoration: underline;
+}
+
+.axv-link-warn {
+  color: var(--axv-warn);
+}
+
+/* ---- shared bits --------------------------------------------------------- */
+
+.axv-spin {
+  width: 12px;
+  height: 12px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  display: inline-block;
+  animation: axv-spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes axv-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.axv-loading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--axv-text-3);
+  font-size: 12.5px;
+  padding: 14px 2px;
+}
+
+.axv-error {
+  border: 1px solid rgba(232, 110, 75, 0.4);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 12.5px;
+  color: var(--axv-warn);
+  background: rgba(232, 110, 75, 0.06);
+}
+
+.axv-help {
+  margin: 0;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--axv-text-3);
+}
+
+.axv-sec {
+  font: 500 11px/1 var(--axv-mono);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--axv-accent);
+  margin-top: 4px;
+}
+
+/* ---- text mode ----------------------------------------------------------- */
+
+.axv-select-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 34px;
+  padding: 6px 10px;
+  border: 1px dashed var(--axv-line-hi);
+  border-radius: 8px;
+  font-size: 12px;
+  color: var(--axv-text-3);
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+.axv-select-info {
+  color: var(--axv-text-2);
+  font-weight: 600;
+}
+
+.axv-abstract {
+  width: 100%;
+  max-width: var(--axv-measure);
+  align-self: center;
+  padding: 14px 16px;
+  border: 1px solid var(--axv-line);
+  border-left: 3px solid var(--axv-accent);
+  border-radius: 8px;
+  background: var(--axv-card-hi);
+  color: var(--axv-text);
+}
+
+.axv-abstract p {
+  margin: 8px 0 0;
+  font-family: ui-serif, Georgia, "Times New Roman", serif;
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: #d7d3ca;
+  overflow-wrap: break-word;
+}
+
+.axv-text {
+  width: 100%;
+  /* Comfortable reading measure, centered in wide hosts; fills narrow sheets. */
+  max-width: var(--axv-measure);
+  align-self: center;
+  /* pre-wrap is load-bearing: \n\n paragraph breaks in the extracted source
+     must keep rendering as blank lines (selection offsets assume the DOM text
+     is byte-identical to the fetched text, so no JS reflow is possible). */
+  white-space: pre-wrap;
+  /* break-word, not anywhere: wrap at spaces first; only tokens longer than
+     the line (URLs, raw TeX runs) may break mid-word. */
+  overflow-wrap: break-word;
+  word-break: normal;
+  hyphens: auto;
+  text-wrap: pretty;
+  font-family: ui-serif, Georgia, "Times New Roman", serif;
+  font-size: 14.5px;
+  line-height: 1.78;
+  color: #d7d3ca;
+  background: var(--axv-card);
+  border: 1px solid var(--axv-line);
+  border-radius: 8px;
+  padding: 24px 28px;
+  /* Fills tall hosts (inspector overlay) but caps with its own scrollbar so
+     short hosts (settings sheet) keep a usable page scroll. */
+  flex: 1 1 auto;
+  min-height: 180px;
+  max-height: clamp(280px, 56vh, 860px);
+  overflow-y: auto;
+  user-select: text;
+  cursor: text;
+}
+
+.axv-source-piece {
+  white-space: inherit;
+}
+
+.axv-source-math {
+  color: var(--axv-text);
+}
+
+.axv-source-display-math {
+  display: block;
+  max-width: 100%;
+  white-space: normal;
+}
+
+/* KaTeX_Main has a smaller x-height than the serif body; a slight upscale
+   (vs KaTeX's 1.21em default, too large here) makes math read as the same
+   optical size as the surrounding 14.5px text. */
+.axv-source-math .katex {
+  font-size: 1.06em;
+}
+
+.axv-source-math .katex-display .katex {
+  font-size: 1.12em;
+}
+
+.axv-source-math .katex-display {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+  white-space: normal;
+  margin: 0.8em 0;
+  padding-bottom: 0.3rem;
+}
+
+/* Size the equation box to its content so wide equations scroll from their
+   true left edge (a centered inline box would clip its left overflow), while
+   narrow equations stay centered via the auto margins. */
+.axv-source-math .katex-display > .katex {
+  width: max-content;
+  margin-inline: auto;
+}
+
+.axv-source-highlight,
+.axv-mark {
+  background: rgba(242, 120, 46, 0.3);
+  color: var(--axv-text);
+  border-radius: 2px;
+  padding: 0 1px;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+.axv-mark-evidence {
+  outline: 1px solid rgba(255, 146, 74, 0.45);
+}
+
+/* Tie the live selection into the accent so the selection that feeds the
+   Highlight / Send-to-chat actions reads as part of the same system. */
+.axv-text ::selection {
+  background: rgba(255, 146, 74, 0.32);
+}
+
+.axv-source-display-math.axv-source-highlight {
+  padding: 0;
+  background: transparent;
+}
+
+.axv-source-display-math.axv-source-highlight .katex-display {
+  background: rgba(242, 120, 46, 0.18);
+  border-radius: 6px;
+  padding: 0.35rem 0.45rem 0.45rem;
+}
+
+.axv-loadmore {
+  align-self: flex-start;
+}
+
+/* ---- PDF mode ------------------------------------------------------------ */
+
+.axv-pdf-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.axv-pdf-state {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: clamp(360px, 56vh, 760px);
+  padding: 18px;
+  border: 1px solid var(--axv-line);
+  border-radius: 8px;
+  background: var(--axv-card);
+  color: var(--axv-text-3);
+  font-size: 12.5px;
+}
+
+.axv-pdf-error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.axv-pdf-viewer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.axv-pdf-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.axv-pdf-tool {
+  height: 28px;
+  padding: 0 10px;
+}
+
+.axv-pdf-page {
+  min-width: max-content;
+  font: 600 11.5px/1 var(--axv-mono);
+  color: var(--axv-text-2);
+}
+
+.axv-pdf-spacer {
+  flex: 1 1 auto;
+}
+
+.axv-pdf-canvas-shell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  flex: 1 1 auto;
+  min-height: clamp(360px, 56vh, 760px);
+  overflow: auto;
+  /* Reserve the scrollbar lane so fit-to-width sizing can't oscillate with
+     the vertical scrollbar appearing/disappearing. */
+  scrollbar-gutter: stable;
+  padding: 14px;
+  border: 1px solid var(--axv-line);
+  border-radius: 8px;
+  background:
+    linear-gradient(45deg, rgba(255, 255, 255, 0.035) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(255, 255, 255, 0.035) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, rgba(255, 255, 255, 0.035) 75%),
+    linear-gradient(-45deg, transparent 75%, rgba(255, 255, 255, 0.035) 75%),
+    #202026;
+  background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+  background-size: 16px 16px;
+}
+
+.axv-pdf-pages {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+  width: 100%;
+  min-width: max-content;
+}
+
+.axv-pdf-page-frame {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  max-width: 100%;
+}
+
+.axv-pdf-page-label {
+  align-self: flex-start;
+  font: 600 11.5px/1 var(--axv-mono);
+  color: var(--axv-text-2);
+  padding: 0 2px;
+}
+
+.axv-pdf-page-canvas-wrap {
+  position: relative;
+  max-width: 100%;
+}
+
+.axv-pdf-canvas {
+  display: block;
+  max-width: none;
+  background: #fff;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.34);
+}
+
+.axv-pdf-page-error {
+  position: absolute;
+  inset: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  background: rgba(18, 18, 22, 0.94);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
+}
+
+.axv-pdf-rendering {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 8px;
+  background: rgba(18, 18, 22, 0.88);
+  color: var(--axv-text-2);
+  font-size: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.24);
+}
+
+/* ---- highlights list ------------------------------------------------------ */
+
+.axv-highlights {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.axv-highlight-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border: 1px solid var(--axv-line);
+  border-left: 3px solid var(--axv-accent);
+  border-radius: 8px;
+  background: var(--axv-card);
+}
+
+.axv-quote {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--axv-text-2);
+  min-width: 0;
+  flex: 1;
+  /* Quotes carry raw TeX source; long unbroken runs must not overflow the row. */
+  overflow-wrap: break-word;
+}
+
+.axv-row-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+@media (max-width: 560px) {
+  .axv-highlight-row {
+    flex-direction: column;
+  }
+  .axv-row-actions {
+    justify-content: flex-start;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .axv-spin {
+    animation-duration: 1.6s;
+  }
+}

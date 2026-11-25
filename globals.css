@@ -1,0 +1,239 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 0 0% 3.5%;
+    --foreground: 36 15% 93%;
+    --card: 0 0% 5.5%;
+    --card-foreground: 36 15% 93%;
+    --popover: 0 0% 6.5%;
+    --popover-foreground: 36 15% 93%;
+    --primary: 25 95% 53%;
+    --primary-foreground: 0 0% 2%;
+    --secondary: 0 0% 10%;
+    --secondary-foreground: 36 15% 85%;
+    --muted: 0 0% 12%;
+    --muted-foreground: 25 5% 55%;
+    --accent: 33 100% 50%;
+    --accent-foreground: 0 0% 2%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 14%;
+    --input: 0 0% 14%;
+    --ring: 25 95% 53%;
+    --chart-1: 25 95% 53%;
+    --chart-2: 33 100% 50%;
+    --chart-3: 15 80% 45%;
+    --chart-4: 40 90% 55%;
+    --chart-5: 8 75% 50%;
+    --artifact-data: 217 91% 60%;
+    --artifact-chart: 142 71% 45%;
+    --artifact-code: 263 70% 50%;
+    --artifact-file: 38 92% 50%;
+    --avatar-neutral: 215 14% 34%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html,
+  body,
+  #root {
+    width: 100%;
+    max-width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  html,
+  body {
+    overscroll-behavior: none;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+  }
+}
+
+/* The header has several persistent actions. Container queries keep every
+   action reachable when the desktop window is narrow or text zoom increases
+   rem-based control sizes. */
+.app-header {
+  container-type: inline-size;
+}
+
+@container (max-width: 46rem) {
+  .app-header-brand-copy,
+  .app-header .ta-pill-txt,
+  .app-header .ta-hd,
+  .app-header-source-label,
+  .app-header-source-count {
+    display: none;
+  }
+
+  .app-header .ta-pill {
+    max-width: none;
+    gap: 0.375rem;
+    padding-inline: 0.5rem;
+  }
+
+  .app-header-source-button {
+    width: 2.25rem;
+    padding-inline: 0;
+    gap: 0;
+  }
+}
+
+@container (max-width: 30rem) {
+  .app-header {
+    flex-wrap: wrap;
+    padding-inline: 0.5rem;
+  }
+
+  .app-header-brand-mark {
+    display: none;
+  }
+
+  .app-header-action-button,
+  .app-header-source-button {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .app-header .ta-pill {
+    height: 2rem;
+    gap: 0.25rem;
+    padding-inline: 0.375rem;
+  }
+}
+
+@layer components {
+  .chat-text-wrap {
+    min-width: 0;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    word-break: normal;
+  }
+
+  .chat-markdown {
+    @apply prose prose-invert prose-sm;
+    @apply prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground;
+    @apply prose-pre:bg-transparent prose-code:before:content-none prose-code:after:content-none;
+    @apply prose-ul:my-2 prose-ol:my-2 prose-li:my-0.5 prose-p:my-2;
+    min-width: 0;
+    width: 100%;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+
+  .chat-markdown-tail {
+    @apply opacity-95;
+  }
+
+  .chat-markdown > div,
+  .chat-markdown :where(p, ul, ol, li, blockquote, h1, h2, h3, h4, h5, h6) {
+    min-width: 0;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+
+  .chat-markdown :where(a, code:not(pre code)) {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .chat-markdown :where(pre, table, .katex-display) {
+    max-width: 100%;
+  }
+
+  .chat-markdown .katex-display {
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: thin;
+    padding: 0.125rem 0.125rem 0.375rem;
+    margin-top: 0.875rem;
+    margin-bottom: 0.875rem;
+  }
+
+  /* Size the equation box to its content: wide equations scroll from their
+     true left edge (a centered inline box clips its left overflow), narrow
+     ones stay centered via the auto margins. */
+  .chat-markdown .katex-display > .katex {
+    width: max-content;
+    margin-inline: auto;
+  }
+
+  /* KaTeX_Main's x-height sits below Plus Jakarta Sans, so 1em reads too
+     small while KaTeX's 1.21em default balloons the line. Display math gets
+     a touch more presence than inline. */
+  .chat-markdown .katex {
+    font-size: 1.08em;
+  }
+
+  .chat-markdown .katex-display .katex {
+    font-size: 1.16em;
+  }
+
+  .shiki-wrapper pre {
+    background: transparent !important;
+  }
+}
+
+
+/* Shimmer sweep for active thinking step headers.
+   The keyframes are deliberately NOT named `shimmer`: tailwind.config.ts
+   declares global `shimmer` keyframes that TRANSLATE the element (the
+   text-free progress-bar sweep). @keyframes share one global namespace, so
+   when both names collided, whichever stylesheet/chunk loaded last redefined
+   the other — translating the whole header row (spinner + "Working" + title)
+   across the screen. This sweep only moves the background gradient; the text
+   itself must never move. */
+.thinking-shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.03) 40%,
+    rgba(255, 255, 255, 0.06) 50%,
+    rgba(255, 255, 255, 0.03) 60%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: thinking-shimmer-sweep 2.5s ease-in-out infinite;
+}
+
+@keyframes thinking-shimmer-sweep {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .thinking-shimmer {
+    animation: none;
+  }
+}
+
+/* Custom scrollbar for Webkit */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: hsl(0 0% 5.5%);
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(0 0% 18%);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(0 0% 25%);
+}

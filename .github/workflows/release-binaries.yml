@@ -1,0 +1,483 @@
+name: Release desktop apps (all providers)
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag
+        required: true
+        type: string
+      signing:
+        description: Build signed publishable artifacts or unsigned test artifacts
+        required: true
+        type: choice
+        default: signed
+        options:
+          - signed
+          - unsigned
+
+permissions:
+  contents: read
+
+env:
+  GH_REPO: ${{ vars.DESKTOP_RELEASE_REPOSITORY || github.repository }}
+
+concurrency:
+  group: aia-desktop-release-${{ github.event.inputs.tag }}
+  cancel-in-progress: false
+
+jobs:
+  prepare-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate release target access
+        env:
+          GH_TOKEN: ${{ secrets.AIA_RELEASE_TOKEN }}
+        run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "Missing AIA_RELEASE_TOKEN secret in this repository." >&2
+            echo "Create a PAT with 'repo' scope for the release repository and add it as AIA_RELEASE_TOKEN." >&2
+            exit 1
+          fi
+
+          if ! gh auth status >/dev/null 2>&1; then
+            echo "GitHub CLI authentication unavailable with AIA_RELEASE_TOKEN." >&2
+            echo "Verify the token is valid and has repo write access to the release repository." >&2
+            exit 1
+          fi
+
+      - name: Create or update draft release
+        env:
+          GH_TOKEN: ${{ secrets.AIA_RELEASE_TOKEN }}
+        run: |
+          gh_retry() {
+            local attempt=1
+            local max_attempts=5
+            local delay=3
+            until "$@"; do
+              local status=$?
+              if [ "$attempt" -ge "$max_attempts" ]; then
+                echo "Command failed after $attempt attempts: $*" >&2
+                return "$status"
+              fi
+              echo "Command failed with status $status. Retrying in ${delay}s: $*" >&2
+              sleep "$delay"
+              attempt=$((attempt + 1))
+              delay=$((delay * 2))
+            done
+          }
+
+          release_tag="${{ github.event.inputs.tag }}"
+          release_title="${{ github.event.inputs.tag }}"
+          release_notes="Desktop AI Analyst apps for macOS and Windows. Signed builds include the embedded Go backend plus Node.js, Playwright, and Chromium runtime resources required by browser integrations."
+
+          if gh_retry gh release view "$release_tag" >/dev/null; then
+            is_draft="$(gh_retry gh release view "$release_tag" --json isDraft --jq '.isDraft')"
+            if [ "$is_draft" = "true" ]; then
+              gh_retry gh release edit "$release_tag" --title "$release_title" --notes "$release_notes"
+            else
+              gh_retry gh release edit "$release_tag" --title "$release_title" --notes "$release_notes" --draft
+            fi
+
+            asset_names="$(gh_retry gh release view "$release_tag" --json assets --jq '.assets[].name')"
+            while IFS= read -r asset; do
+              if [ -n "$asset" ]; then
+                gh_retry gh release delete-asset "$release_tag" "$asset" --yes
+              fi
+            done <<< "$asset_names"
+          else
+            gh_retry gh release create "$release_tag" \
+              --title "$release_title" \
+              --notes "$release_notes" \
+              --draft
+          fi
+
+  build-macos:
+    needs: prepare-release
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: arm64
+            goarch: arm64
+            runner: macos-26
+            rust_target: aarch64-apple-darwin
+            asset_name: AI-Analyst-macOS-arm64.dmg
+          - arch: x64
+            goarch: amd64
+            runner: macos-26-intel
+            rust_target: x86_64-apple-darwin
+            asset_name: AI-Analyst-macOS-x64.dmg
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.rust_target }}
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Set up native document and search tools
+        uses: mamba-org/setup-micromamba@v2
+        with:
+          environment-name: native-tools
+          create-args: >-
+            -c conda-forge
+            poppler
+            tesseract
+            ripgrep
+            fd-find
+          cache-environment: true
+
+      - name: Locate native document and search tools
+        run: echo "AIA_NATIVE_TOOLS_DIR=$MAMBA_ROOT_PREFIX/envs/native-tools" >> "$GITHUB_ENV"
+
+      - name: Validate macOS signing inputs
+        if: ${{ github.event.inputs.signing == 'signed' }}
+        env:
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
+          APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
+          APPLE_API_KEY_BASE64: ${{ secrets.APPLE_API_KEY_BASE64 }}
+        run: |
+          if [ -z "$APPLE_CERTIFICATE" ] || [ -z "$APPLE_CERTIFICATE_PASSWORD" ]; then
+            echo "Signed macOS builds require APPLE_CERTIFICATE and APPLE_CERTIFICATE_PASSWORD secrets." >&2
+            exit 1
+          fi
+          if { [ -z "$APPLE_API_ISSUER" ] || [ -z "$APPLE_API_KEY" ] || [ -z "$APPLE_API_KEY_BASE64" ]; } && \
+             { [ -z "$APPLE_ID" ] || [ -z "$APPLE_PASSWORD" ] || [ -z "$APPLE_TEAM_ID" ]; }; then
+            echo "Signed macOS builds require either App Store Connect API secrets or APPLE_ID/APPLE_PASSWORD/APPLE_TEAM_ID notarization secrets." >&2
+            exit 1
+          fi
+
+      - name: Configure macOS signing
+        if: ${{ github.event.inputs.signing == 'signed' }}
+        env:
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
+          APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
+          APPLE_API_KEY_BASE64: ${{ secrets.APPLE_API_KEY_BASE64 }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          KEYCHAIN_PASSWORD="$(openssl rand -base64 24)"
+          echo "$APPLE_CERTIFICATE" | base64 --decode > "$RUNNER_TEMP/certificate.p12"
+          security create-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+          security set-keychain-settings -t 3600 -u build.keychain
+          security import "$RUNNER_TEMP/certificate.p12" -k build.keychain -P "$APPLE_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" build.keychain
+
+          if [ -n "$APPLE_SIGNING_IDENTITY" ]; then
+            CERT_ID="$APPLE_SIGNING_IDENTITY"
+          else
+            CERT_ID="$(security find-identity -v -p codesigning build.keychain | awk -F'"' '/Developer ID Application/ { print $2; exit }')"
+          fi
+          if [ -z "$CERT_ID" ]; then
+            echo "Could not find a Developer ID Application signing identity in the imported certificate." >&2
+            security find-identity -v -p codesigning build.keychain
+            exit 1
+          fi
+          echo "APPLE_SIGNING_IDENTITY=$CERT_ID" >> "$GITHUB_ENV"
+
+          if [ -n "$APPLE_API_KEY_BASE64" ]; then
+            echo "$APPLE_API_KEY_BASE64" | base64 --decode > "$RUNNER_TEMP/AuthKey_${APPLE_API_KEY}.p8"
+            echo "APPLE_API_ISSUER=$APPLE_API_ISSUER" >> "$GITHUB_ENV"
+            echo "APPLE_API_KEY=$APPLE_API_KEY" >> "$GITHUB_ENV"
+            echo "APPLE_API_KEY_PATH=$RUNNER_TEMP/AuthKey_${APPLE_API_KEY}.p8" >> "$GITHUB_ENV"
+          else
+            echo "APPLE_ID=$APPLE_ID" >> "$GITHUB_ENV"
+            echo "APPLE_PASSWORD=$APPLE_PASSWORD" >> "$GITHUB_ENV"
+            echo "APPLE_TEAM_ID=$APPLE_TEAM_ID" >> "$GITHUB_ENV"
+          fi
+
+      - name: Configure unsigned macOS test signing
+        if: ${{ github.event.inputs.signing == 'unsigned' }}
+        run: echo "APPLE_SIGNING_IDENTITY=-" >> "$GITHUB_ENV"
+
+      - name: Prepare desktop sidecars
+        run: >
+          npm run desktop:prepare -- --goos darwin --goarch ${{ matrix.goarch }}
+          --target-triple ${{ matrix.rust_target }}
+          --native-tools-dir "$AIA_NATIVE_TOOLS_DIR"
+
+      - name: Build macOS desktop app
+        env:
+          CI: true
+        run: npx tauri build --target ${{ matrix.rust_target }} --bundles dmg
+
+      - name: Collect macOS artifact
+        run: |
+          mkdir -p dist/release
+          dmg_path="$(find src-tauri/target/${{ matrix.rust_target }}/release/bundle/dmg -name '*.dmg' -print -quit)"
+          if [ -z "$dmg_path" ]; then
+            echo "No DMG artifact found." >&2
+            exit 1
+          fi
+          cp "$dmg_path" "dist/release/${{ matrix.asset_name }}"
+
+      - name: Upload macOS release asset
+        env:
+          GH_TOKEN: ${{ secrets.AIA_RELEASE_TOKEN }}
+        run: gh release upload "${{ github.event.inputs.tag }}" "dist/release/${{ matrix.asset_name }}" --clobber
+
+      - name: Upload macOS workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.asset_name }}
+          path: dist/release/${{ matrix.asset_name }}
+
+  build-windows:
+    needs: prepare-release
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-msvc
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Set up native document and search tools
+        uses: mamba-org/setup-micromamba@v2
+        with:
+          environment-name: native-tools
+          create-args: >-
+            -c conda-forge
+            poppler
+            tesseract
+            ripgrep
+            fd-find
+          cache-environment: true
+
+      - name: Locate native document and search tools
+        shell: pwsh
+        run: |
+          "AIA_NATIVE_TOOLS_DIR=$env:MAMBA_ROOT_PREFIX\envs\native-tools" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Verify Windows local search runtime
+        shell: pwsh
+        run: |
+          $rg = Get-ChildItem -Path $env:AIA_NATIVE_TOOLS_DIR -Filter rg.exe -File -Recurse | Select-Object -First 1
+          $fd = Get-ChildItem -Path $env:AIA_NATIVE_TOOLS_DIR -Filter fd.exe -File -Recurse | Select-Object -First 1
+          if (-not $rg) {
+            throw "ripgrep executable was not found under AIA_NATIVE_TOOLS_DIR=$env:AIA_NATIVE_TOOLS_DIR"
+          }
+          if (-not $fd) {
+            throw "fd executable was not found under AIA_NATIVE_TOOLS_DIR=$env:AIA_NATIVE_TOOLS_DIR"
+          }
+          $searchPath = @($rg.DirectoryName, $fd.DirectoryName) | Select-Object -Unique
+          $env:PATH = ((@($searchPath) + @($env:PATH)) -join [IO.Path]::PathSeparator)
+          & $rg.FullName --version
+          & $fd.FullName --version
+          Push-Location server
+          go test ./internal/localroots -count=1
+          go test ./internal/localexec -run '^TestCommandContextHidesWindowsConsole$' -count=1
+          go test ./internal/chat/tools -run '^Test(LocalSearchCommand|CleanLocalMachineRel)' -count=1
+          Pop-Location
+
+      - name: Validate Windows signing inputs
+        if: ${{ github.event.inputs.signing == 'signed' }}
+        shell: pwsh
+        env:
+          WINDOWS_CERTIFICATE: ${{ secrets.WINDOWS_CERTIFICATE }}
+          WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
+        run: |
+          if (-not $env:WINDOWS_CERTIFICATE -or -not $env:WINDOWS_CERTIFICATE_PASSWORD) {
+            Write-Error "Signed Windows builds require WINDOWS_CERTIFICATE and WINDOWS_CERTIFICATE_PASSWORD secrets."
+            exit 1
+          }
+
+      - name: Prepare desktop sidecars
+        shell: pwsh
+        run: npm run desktop:prepare -- --goos windows --goarch amd64 --target-triple x86_64-pc-windows-msvc --native-tools-dir "$env:AIA_NATIVE_TOOLS_DIR"
+
+      - name: Write Windows signing certificate
+        if: ${{ github.event.inputs.signing == 'signed' }}
+        shell: pwsh
+        env:
+          WINDOWS_CERTIFICATE: ${{ secrets.WINDOWS_CERTIFICATE }}
+        run: |
+          $certPath = Join-Path $env:RUNNER_TEMP "windows-signing.pfx"
+          [IO.File]::WriteAllBytes($certPath, [Convert]::FromBase64String($env:WINDOWS_CERTIFICATE))
+          "WINDOWS_CERTIFICATE_PATH=$certPath" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Configure Windows Tauri signing
+        if: ${{ github.event.inputs.signing == 'signed' }}
+        shell: pwsh
+        run: |
+          $signtool = Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\bin\*\x64\signtool.exe" | Sort-Object FullName -Descending | Select-Object -First 1
+          if (-not $signtool) { throw "signtool.exe not found" }
+          "SIGNTOOL_EXE=$($signtool.FullName)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+          $signScript = Join-Path $env:RUNNER_TEMP "sign-tauri.cmd"
+          @'
+          @echo off
+          "%SIGNTOOL_EXE%" sign /f "%WINDOWS_CERTIFICATE_PATH%" /p "%WINDOWS_CERTIFICATE_PASSWORD%" /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 "%~1"
+          exit /b %ERRORLEVEL%
+          '@ | Set-Content -Path $signScript -Encoding Ascii
+
+          $configPath = Join-Path $env:RUNNER_TEMP "tauri-windows-signing.json"
+          $signCommand = '"' + $signScript + '" %1'
+          @{
+            bundle = @{
+              windows = @{
+                signCommand = $signCommand
+              }
+            }
+          } | ConvertTo-Json -Depth 5 | Set-Content -Path $configPath -Encoding utf8
+          "TAURI_WINDOWS_SIGN_CONFIG=$configPath" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Sign Windows backend sidecar
+        if: ${{ github.event.inputs.signing == 'signed' }}
+        shell: pwsh
+        env:
+          WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
+        run: |
+          & "$env:SIGNTOOL_EXE" sign /f "$env:WINDOWS_CERTIFICATE_PATH" /p "$env:WINDOWS_CERTIFICATE_PASSWORD" /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 src-tauri\binaries\ai-analyst-server-x86_64-pc-windows-msvc.exe
+
+      - name: Build signed Windows desktop app
+        if: ${{ github.event.inputs.signing == 'signed' }}
+        shell: pwsh
+        env:
+          WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
+        run: npx tauri build --target x86_64-pc-windows-msvc --bundles nsis --config "$env:TAURI_WINDOWS_SIGN_CONFIG"
+
+      - name: Build unsigned Windows desktop app
+        if: ${{ github.event.inputs.signing == 'unsigned' }}
+        run: npx tauri build --target x86_64-pc-windows-msvc --bundles nsis
+
+      - name: Verify Windows signatures
+        if: ${{ github.event.inputs.signing == 'signed' }}
+        shell: pwsh
+        run: |
+          $installer = Get-ChildItem src-tauri\target\x86_64-pc-windows-msvc\release\bundle\nsis\*.exe | Select-Object -First 1
+          if (-not $installer) { throw "No NSIS installer found" }
+          $appExe = "src-tauri\target\x86_64-pc-windows-msvc\release\ai-analyst-desktop.exe"
+          if (-not (Test-Path $appExe)) { throw "No Windows app executable found at $appExe" }
+          & "$env:SIGNTOOL_EXE" verify /pa /v $appExe
+          & "$env:SIGNTOOL_EXE" verify /pa /v src-tauri\binaries\ai-analyst-server-x86_64-pc-windows-msvc.exe
+          & "$env:SIGNTOOL_EXE" verify /pa /v $installer.FullName
+
+      - name: Collect Windows artifact
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force dist\release | Out-Null
+          $installer = Get-ChildItem src-tauri\target\x86_64-pc-windows-msvc\release\bundle\nsis\*.exe | Select-Object -First 1
+          if (-not $installer) { throw "No NSIS installer found" }
+          Copy-Item $installer.FullName dist\release\AI-Analyst-Windows-x64-Setup.exe
+
+      - name: Upload Windows release asset
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.AIA_RELEASE_TOKEN }}
+        run: gh release upload "${{ github.event.inputs.tag }}" "dist/release/AI-Analyst-Windows-x64-Setup.exe" --clobber
+
+      - name: Upload Windows workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: AI-Analyst-Windows-x64-Setup.exe
+          path: dist/release/AI-Analyst-Windows-x64-Setup.exe
+
+  finalize-release:
+    needs: [build-macos, build-windows]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify release assets and publish
+        env:
+          GH_TOKEN: ${{ secrets.AIA_RELEASE_TOKEN }}
+        run: |
+          gh_retry() {
+            local attempt=1
+            local max_attempts=5
+            local delay=3
+            until "$@"; do
+              local status=$?
+              if [ "$attempt" -ge "$max_attempts" ]; then
+                echo "Command failed after $attempt attempts: $*" >&2
+                return "$status"
+              fi
+              echo "Command failed with status $status. Retrying in ${delay}s: $*" >&2
+              sleep "$delay"
+              attempt=$((attempt + 1))
+              delay=$((delay * 2))
+            done
+          }
+
+          release_tag="${{ github.event.inputs.tag }}"
+          expected_assets=(
+            "AI-Analyst-macOS-arm64.dmg"
+            "AI-Analyst-macOS-x64.dmg"
+            "AI-Analyst-Windows-x64-Setup.exe"
+          )
+
+          asset_names="$(gh_retry gh release view "$release_tag" --json assets --jq '.assets[].name')"
+          missing=0
+          for asset in "${expected_assets[@]}"; do
+            if ! printf '%s\n' "$asset_names" | grep -Fxq "$asset"; then
+              echo "Missing expected release asset: $asset" >&2
+              missing=1
+            fi
+          done
+          if [ "$missing" -ne 0 ]; then
+            exit 1
+          fi
+
+          extra=0
+          for asset in $asset_names; do
+            expected=0
+            for expected_asset in "${expected_assets[@]}"; do
+              if [ "$asset" = "$expected_asset" ]; then
+                expected=1
+                break
+              fi
+            done
+            if [ "$expected" -ne 1 ]; then
+              echo "Unexpected release asset: $asset" >&2
+              extra=1
+            fi
+          done
+          if [ "$extra" -ne 0 ]; then
+            exit 1
+          fi
+
+          gh_retry gh release edit "$release_tag" --draft=false
+          gh_retry gh release view "$release_tag" --json url --jq '.url'

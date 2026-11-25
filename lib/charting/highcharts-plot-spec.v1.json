@@ -1,0 +1,224 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "highcharts-plot-spec.v1",
+  "title": "Highcharts Plot Spec V1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "module", "options"],
+  "properties": {
+    "schema_version": {
+      "const": "highcharts-plot-spec.v1"
+    },
+    "module": {
+      "type": "string",
+      "enum": ["core", "stock"]
+    },
+    "options": {
+      "$ref": "#/$defs/options"
+    }
+  },
+  "$defs": {
+    "options": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "chart": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "type": {
+              "type": "string"
+            },
+            "zoomType": {
+              "type": "string",
+              "enum": ["x", "y", "xy"]
+            }
+          }
+        },
+        "title": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "text": {
+              "type": "string"
+            }
+          }
+        },
+        "subtitle": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "text": {
+              "type": "string"
+            }
+          }
+        },
+        "xAxis": {
+          "$ref": "#/$defs/axis"
+        },
+        "yAxis": {
+          "$ref": "#/$defs/axis"
+        },
+        "legend": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            }
+          }
+        },
+        "tooltip": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "shared": {
+              "type": "boolean"
+            },
+            "outside": {
+              "type": "boolean"
+            },
+            "useHTML": {
+              "type": "boolean"
+            },
+            "formatter_id": {
+              "type": "string"
+            },
+            "pointFormat": {
+              "type": "string"
+            },
+            "valueSuffix": {
+              "type": "string"
+            }
+          }
+        },
+        "plotOptions": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "series": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/series"
+          }
+        },
+        "drilldown": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "rangeSelector": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "navigator": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "scrollbar": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "required": ["series"]
+    },
+    "axis": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "title": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "text": {
+                  "type": "string"
+                }
+              }
+            },
+            "categories": {
+              "type": "array",
+              "items": {
+                "type": ["string", "number"]
+              }
+            },
+            "type": {
+              "type": "string",
+              "enum": ["linear", "logarithmic", "datetime", "category"]
+            },
+            "min": {
+              "type": "number"
+            },
+            "max": {
+              "type": "number"
+            },
+            "opposite": {
+              "type": "boolean"
+            }
+          }
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      ]
+    },
+    "series": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "data"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "line",
+            "spline",
+            "area",
+            "areaspline",
+            "column",
+            "bar",
+            "scatter",
+            "pie",
+            "candlestick",
+            "ohlc"
+          ]
+        },
+        "name": {
+          "type": "string"
+        },
+        "data": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": ["number", "string", "null"]
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": true
+              }
+            ]
+          }
+        },
+        "yAxis": {
+          "type": "number"
+        },
+        "color": {
+          "type": "string"
+        },
+        "stack": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
